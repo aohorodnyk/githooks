@@ -10,13 +10,13 @@ BRANCH_NAME=$(git symbolic-ref --short HEAD)
 
 # Check if branch name is found.
 if [ -z "${BRANCH_NAME-}" ]; then
-  echo "[WARNING]: Branch name not found"
+  echo "[prepare-commit-msg]: Branch name not found"
   exit 0
 fi
 
-parseVersion() {
-  # Copied from https://semver.org.
-  REGEX_SEMVER="((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
+prependMessage() {
+  # Simple semver regex (1.2.3).
+  REGEX_SEMVER="((0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*))"
 
   # Jira tickets regex (TMP-1, OD-234, MTPS-234).
   REGEX_JIRA_TICKET="([A-Z]+-[0-9]+)"
@@ -33,26 +33,42 @@ parseVersion() {
 
   if [[ ${BRANCH_NAME} =~ ${REGEX_SEMVER} ]]; then
     PARSED_VERSION="${BASH_REMATCH[1]}"
+    echo "[${PARSED_VERSION}]: "
 
-    return ${PARSED_VERSION}
+    return 1
   fi
 
   if [[ ${BRANCH_NAME} =~ ${REGEX_JIRA_TICKET} ]]; then
     PARSED_VERSION="${BASH_REMATCH[1]}"
+    echo "[${PARSED_VERSION}]:"
 
-    return ${PARSED_VERSION}
+    return 1
   fi
 
   if [[ ${BRANCH_NAME} =~ ${REGEX_ISSUE_NUMBER} ]]; then
     PARSED_VERSION="${BASH_REMATCH[2]}"
+    echo "[#${PARSED_VERSION}]:"
 
-    return ${PARSED_VERSION}
+    return 1
   fi
-
-  return ""
 }
 
-parseVersion $BRANCH_NAME
-PARSED_VERSION=${?}
 
-echo "${PARSED_VERSION}"
+PREPEND_MSG=$(prependMessage $BRANCH_NAME)
+
+if [ -z "${PREPEND_MSG-}" ]; then
+  echo "[prepare-commit-msg]: No version found"
+  exit 0
+fi
+
+# Since we expect to have the mssage in the first line, we can use head to get it.
+MSG=$(head -n 1 "${1}")
+
+# If the message already contains the version, we do not prepend it.
+if [[ "${MSG}" == *"${PREPEND_MSG}"* ]]; then
+  echo '[prepare-commit-msg]: Version already found in message'
+  exit 0
+fi
+
+# Prepend the version to the message.
+sed -i.bak -e "1s|^|${PREPEND_MSG} |" "${COMMIT_MSG_FILE}"
