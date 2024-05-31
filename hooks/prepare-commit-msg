@@ -10,4 +10,5 @@ SHA1=$3
 echo "Commit message file: $COMMIT_MSG_FILE"
 echo "Commit source: $COMMIT_SOURCE"
 echo "Commit SHA1: $SHA1"
+cat $COMMIT_MSG_FILE
 
