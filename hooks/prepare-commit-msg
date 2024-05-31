@@ -8,10 +8,51 @@ COMMIT_MSG_FILE=$1
 
 BRANCH_NAME=$(git symbolic-ref --short HEAD)
 
+# Check if branch name is found.
 if [ -z "${BRANCH_NAME-}" ]; then
   echo "[WARNING]: Branch name not found"
   exit 0
 fi
 
-echo $BRANCH_NAME
+parseVersion() {
+  # Copied from https://semver.org.
+  REGEX_SEMVER="((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
 
+  # Jira tickets regex (TMP-1, OD-234, MTPS-234).
+  REGEX_JIRA_TICKET="([A-Z]+-[0-9]+)"
+
+  # Github/Gitlab/Gitea issues regex (1-description, 234-description, 2345-description).
+  # Note: Issue number must be upfront of the description.
+  # It supports:
+  # 1. 123-my_feature
+  # 2. feature/1234-my_feature
+  REGEX_ISSUE_NUMBER="(^|\/)([0-9]+)"
+
+  # By default we do not add any prefix.
+  PARSED_VERSION=""
+
+  if [[ ${BRANCH_NAME} =~ ${REGEX_SEMVER} ]]; then
+    PARSED_VERSION="${BASH_REMATCH[1]}"
+
+    return ${PARSED_VERSION}
+  fi
+
+  if [[ ${BRANCH_NAME} =~ ${REGEX_JIRA_TICKET} ]]; then
+    PARSED_VERSION="${BASH_REMATCH[1]}"
+
+    return ${PARSED_VERSION}
+  fi
+
+  if [[ ${BRANCH_NAME} =~ ${REGEX_ISSUE_NUMBER} ]]; then
+    PARSED_VERSION="${BASH_REMATCH[2]}"
+
+    return ${PARSED_VERSION}
+  fi
+
+  return ""
+}
+
+parseVersion $BRANCH_NAME
+PARSED_VERSION=${?}
+
+echo "${PARSED_VERSION}"
