@@ -13,4 +13,3 @@ echo "Commit SHA1: $SHA1"
 echo '-=-=-=-=-=-'
 cat $COMMIT_MSG_FILE
 echo '-=-=-=-=-=-'
-
