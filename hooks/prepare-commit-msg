@@ -3,17 +3,14 @@
 # This hook adds issue/ticket/version number from branch name to every commit message
 #
 
-# Colors
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
 # Incoming parameters.
 COMMIT_MSG_FILE=$1
 
 BRANCH_NAME=$(git symbolic-ref --short HEAD)
+BRANCH_NAME2=""
 
 if [ -z "${BRANCH_NAME2-}" ]; then
-  echo "${RED}[WARNING]${NC}: Branch name not found"
+  echo "[WARNING]: Branch name not found"
   exit 0
 fi
 
