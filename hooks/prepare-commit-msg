@@ -7,9 +7,8 @@
 COMMIT_MSG_FILE=$1
 
 BRANCH_NAME=$(git symbolic-ref --short HEAD)
-BRANCH_NAME2=""
 
-if [ -z "${BRANCH_NAME2-}" ]; then
+if [ -z "${BRANCH_NAME-}" ]; then
   echo "[WARNING]: Branch name not found"
   exit 0
 fi
