@@ -1,0 +1,6 @@
+- id: ticket
+  name: Prepend ticket number from the current branch name
+  entry: ./hooks/prepare-commit-msg
+  language: script
+  stages:
+    - prepare-commit-msg

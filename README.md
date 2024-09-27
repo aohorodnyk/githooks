@@ -2,6 +2,22 @@
 
 In this repo I'll collect custom git hooks that I use for my projects. Feel free to use them and contribute by creating a ticket or PR.
 
+## pre-commit
+
+This repo supports [pre-commit](https://pre-commit.com) project by defining all hooks in `.pre-commit-hooks.yaml`.
+
+To enable this git hooks through pre-commit, add this configuration:
+
+```yaml
+repos:
+  - repo: https://github.com/aohorodnyk/githooks
+    rev: v1.0.1
+    hooks:
+      - id: ticket
+```
+
+And install required hooks for pre-commit: `pre-commit install --hook-type prepare-commit-msg`
+
 ## Git hook prepare-commit-msg
 
 `prepare-commit-msg` is a hook that adds the issue number to the commit message.
